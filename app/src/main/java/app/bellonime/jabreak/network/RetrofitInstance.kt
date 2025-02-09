@@ -1,16 +1,14 @@
 package app.bellonime.jabreak.network
 
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-
+// Misalnya, pada RetrofitInstance.kt kamu sudah menginisialisasi Retrofit:
 object RetrofitInstance {
     private const val BASE_URL = "https://bellonime.vercel.app/"
 
-    val api: ApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ApiService::class.java)
-    }
+    private val retrofit = retrofit2.Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+        .build()
+
+    val api: ApiService = retrofit.create(ApiService::class.java)
 }
+

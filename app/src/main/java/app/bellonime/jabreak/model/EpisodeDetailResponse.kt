@@ -39,3 +39,12 @@ data class ServerItem(
     val serverId: String?,
     val href: String?
 )
+
+
+
+// EpisodeNavigation.kt
+data class EpisodeNavigation(
+    val episodeId: String?
+)
+
+

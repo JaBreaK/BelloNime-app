@@ -1,18 +1,25 @@
 package app.bellonime.jabreak.ui.episode
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import app.bellonime.jabreak.R
+import app.bellonime.jabreak.adapter.ServerAdapter
 import app.bellonime.jabreak.model.EpisodeDetail
 import app.bellonime.jabreak.model.EpisodeDetailResponse
+import app.bellonime.jabreak.model.Quality
 import app.bellonime.jabreak.network.RetrofitInstance
+import app.bellonime.jabreak.network.ServerItem
+import app.bellonime.jabreak.network.ServerResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,130 +27,175 @@ import retrofit2.Response
 class EpisodeDetailActivity : AppCompatActivity() {
 
     private lateinit var titleText: TextView
-    private lateinit var watchNowButton: TextView
+    private lateinit var webView: WebView
     private lateinit var prevEpisodeButton: TextView
     private lateinit var nextEpisodeButton: TextView
-    private lateinit var serverChipGroup: ChipGroup
+    private lateinit var serverRecyclerView: RecyclerView
 
-    // Variabel untuk menyimpan URL streaming yang aktif
-    private var currentStreamingUrl: String? = null
-
-    // Base URL (jika URL yang diterima bersifat relative)
+    // URL base (jika diperlukan)
     private val baseUrl = "https://bellonime.vercel.app"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_episode_detail)
 
-        // Inisialisasi view
+        // Inisialisasi view dari XML
         titleText = findViewById(R.id.episodeTitle)
-        watchNowButton = findViewById(R.id.watchNowButton)
+        webView = findViewById(R.id.webView)
         prevEpisodeButton = findViewById(R.id.prevEpisodeButton)
         nextEpisodeButton = findViewById(R.id.nextEpisodeButton)
-        serverChipGroup = findViewById(R.id.serverChipGroup)
+        serverRecyclerView = findViewById(R.id.serverRecyclerView)
 
-        // Ambil episodeId dari intent
+        // Setup RecyclerView (horizontal)
+        serverRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        // Konfigurasi WebView
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.webViewClient = object : WebViewClient() {
+            override fun onReceivedError(
+                view: WebView?,
+                errorCode: Int,
+                description: String?,
+                failingUrl: String?
+            ) {
+                Toast.makeText(this@EpisodeDetailActivity, "Error loading video: $description", Toast.LENGTH_SHORT).show()
+            }
+        }
+        webView.webChromeClient = WebChromeClient()
+
+        // Ambil episodeId dari Intent
         val episodeId = intent.getStringExtra("episodeId")
         if (episodeId.isNullOrEmpty()) {
             Toast.makeText(this, "Episode ID missing", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-
-        // Panggil API untuk mendapatkan detail episode
         fetchEpisodeDetail(episodeId)
     }
 
+    // Fungsi untuk mengambil detail episode dari API
     private fun fetchEpisodeDetail(episodeId: String) {
         RetrofitInstance.api.getEpisodeDetail(episodeId).enqueue(object : Callback<EpisodeDetailResponse> {
             override fun onResponse(call: Call<EpisodeDetailResponse>, response: Response<EpisodeDetailResponse>) {
                 if (response.isSuccessful) {
-                    val episode = response.body()?.data
-                    if (episode != null) {
-                        bindEpisodeDetail(episode)
-                    } else {
-                        Toast.makeText(this@EpisodeDetailActivity, "Episode detail is null", Toast.LENGTH_SHORT).show()
+                    response.body()?.data?.let { bindEpisodeDetail(it) } ?: run {
+                        Toast.makeText(this@EpisodeDetailActivity, "Invalid episode data", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(this@EpisodeDetailActivity, "Failed to load episode detail", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@EpisodeDetailActivity, "Failed to load episode", Toast.LENGTH_SHORT).show()
                 }
             }
+
             override fun onFailure(call: Call<EpisodeDetailResponse>, t: Throwable) {
-                Toast.makeText(this@EpisodeDetailActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@EpisodeDetailActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
+    // Fungsi untuk mengikat data episode ke tampilan
     private fun bindEpisodeDetail(episode: EpisodeDetail) {
-        // Tampilkan judul episode
-        titleText.text = episode.title ?: "Untitled"
+        titleText.text = episode.title ?: "Untitled Episode"
 
-        // Set default streaming URL sebagai awal
-        currentStreamingUrl = episode.defaultStreamingUrl
+        // Muat URL default (contoh: preview video)
+        episode.defaultStreamingUrl?.let { loadVideoUrl(it) }
 
-        // Watch Now: Buka URL streaming yang aktif saat tombol diklik
-        watchNowButton.setOnClickListener {
-            currentStreamingUrl?.let { url ->
-                val finalUrl = if (url.startsWith("http")) url else baseUrl + url
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl))
-                startActivity(intent)
-            } ?: run {
-                Toast.makeText(this, "Streaming URL not available", Toast.LENGTH_SHORT).show()
-            }
+        // Setup navigasi episode (prev/next)
+        setupNavigationButtons(episode)
+
+        // Tampilkan pilihan server menggunakan RecyclerView
+        episode.server?.qualities?.let { qualities ->
+            setupServerRecyclerView(qualities)
         }
+    }
 
-        // Konfigurasi tombol Prev Episode
-        if (episode.hasPrevEpisode && episode.prevEpisode != null && !episode.prevEpisode.episodeId.isNullOrEmpty()) {
+    // Fungsi untuk memuat URL video ke WebView
+    private fun loadVideoUrl(url: String) {
+        webView.loadUrl(url)
+    }
+
+    // Fungsi untuk navigasi ke episode sebelumnya/selanjutnya
+    private fun setupNavigationButtons(episode: EpisodeDetail) {
+        episode.prevEpisode?.episodeId?.let { id ->
             prevEpisodeButton.visibility = View.VISIBLE
             prevEpisodeButton.setOnClickListener {
-                val intent = Intent(this, EpisodeDetailActivity::class.java)
-                intent.putExtra("episodeId", episode.prevEpisode.episodeId)
-                startActivity(intent)
-                finish()
+                restartActivityWithEpisode(id)
             }
-        } else {
-            prevEpisodeButton.visibility = View.GONE
-        }
+        } ?: run { prevEpisodeButton.visibility = View.GONE }
 
-        // Konfigurasi tombol Next Episode
-        if (episode.hasNextEpisode && episode.nextEpisode != null && !episode.nextEpisode.episodeId.isNullOrEmpty()) {
+        episode.nextEpisode?.episodeId?.let { id ->
             nextEpisodeButton.visibility = View.VISIBLE
             nextEpisodeButton.setOnClickListener {
-                val intent = Intent(this, EpisodeDetailActivity::class.java)
-                intent.putExtra("episodeId", episode.nextEpisode.episodeId)
-                startActivity(intent)
-                finish()
+                restartActivityWithEpisode(id)
             }
-        } else {
-            nextEpisodeButton.visibility = View.GONE
-        }
+        } ?: run { nextEpisodeButton.visibility = View.GONE }
+    }
 
-        // Tampilkan pilihan server berdasarkan kualitas yang tersedia
-        serverChipGroup.removeAllViews()
-        val qualities = episode.server?.qualities
-        if (qualities != null) {
-            for (quality in qualities) {
-                // Pastikan ada setidaknya satu server dalam serverList
-                if (!quality.serverList.isNullOrEmpty()) {
-                    val chip = Chip(this)
-                    chip.text = quality.title ?: "Unknown"
-                    chip.isClickable = true
-                    chip.isCheckable = false
-                    chip.setOnClickListener {
-                        // Saat chip diklik, gunakan server pertama dari daftar untuk kualitas ini
-                        val serverItem = quality.serverList.firstOrNull()
-                        if (serverItem != null) {
-                            var newUrl = serverItem.href ?: ""
-                            if (!newUrl.startsWith("http")) {
-                                newUrl = baseUrl + newUrl
-                            }
-                            currentStreamingUrl = newUrl
-                            Toast.makeText(this, "Switched to ${quality.title}", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    serverChipGroup.addView(chip)
+    // Fungsi untuk setup RecyclerView dengan pilihan server dari setiap kualitas
+    private fun setupServerRecyclerView(qualities: List<Quality>) {
+        val serverItems = mutableListOf<ServerItem>()
+        qualities.forEach { quality ->
+            quality.serverList?.forEach { server ->
+                // Pastikan serverId tidak kosong
+                if (!server.serverId.isNullOrEmpty()) {
+                    serverItems.add(
+                        ServerItem(
+                            quality = quality.title ?: "Unknown Quality",
+                            serverTitle = server.title ?: "Unknown Server",
+                            serverId = server.serverId
+                        )
+                    )
                 }
             }
+        }
+        Log.d("EpisodeDetail", "Number of server items: ${serverItems.size}")
+        if (serverItems.isEmpty()) {
+            Toast.makeText(this, "No server options available", Toast.LENGTH_SHORT).show()
+        }
+        val adapter = ServerAdapter(serverItems, object : ServerAdapter.OnServerClickListener {
+            override fun onServerClick(server: ServerItem, position: Int) {
+                fetchVideoUrl(server.serverId)
+            }
+        })
+        serverRecyclerView.adapter = adapter
+    }
+
+    // Fungsi untuk memanggil API getVideoUrl berdasarkan serverId
+    private fun fetchVideoUrl(serverId: String) {
+        RetrofitInstance.api.getVideoUrl(serverId).enqueue(object : Callback<ServerResponse> {
+            override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
+                if (response.isSuccessful) {
+                    val videoUrl = response.body()?.data?.url
+                    if (!videoUrl.isNullOrEmpty()) {
+                        loadVideoUrl(videoUrl)
+                    } else {
+                        Toast.makeText(this@EpisodeDetailActivity, "Video URL not available", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@EpisodeDetailActivity, "Failed to get video: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ServerResponse>, t: Throwable) {
+                Toast.makeText(this@EpisodeDetailActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // Restart activity untuk pindah episode
+    private fun restartActivityWithEpisode(episodeId: String) {
+        Intent(this, EpisodeDetailActivity::class.java).apply {
+            putExtra("episodeId", episodeId)
+            startActivity(this)
+        }
+        finish()
+    }
+
+    override fun onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
         }
     }
 }
