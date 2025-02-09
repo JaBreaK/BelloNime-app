@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Judul Episode -->
+        <TextView
+            android:id="@+id/episodeTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Episode Title"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Pilihan Server (ChipGroup) -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/serverChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:chipSpacing="8dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Tombol Watch Now -->
+        <TextView
+            android:id="@+id/watchNowButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/episode_button_background"
+            android:text="Watch Now"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp"
+            android:padding="12dp" />
+
+        <!-- Navigasi Episode (Prev & Next) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/prevEpisodeButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/episode_button_background"
+                android:text="Prev Episode"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:padding="12dp" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/nextEpisodeButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/episode_button_background"
+                android:text="Next Episode"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:padding="12dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
