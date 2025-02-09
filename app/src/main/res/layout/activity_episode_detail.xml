@@ -3,22 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    >
 
-    <TextView
-        android:id="@+id/episodeTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:text="Episode Title" />
 
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_marginTop="16dp" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="5dp" />
 
+    <TextView
+        android:id="@+id/episodeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="8dp"
+        android:text="Episode Title"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/serverChipGroup"
@@ -33,26 +38,25 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/prevEpisodeButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Previous Episode"
-            android:visibility="gone"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true" />
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/nextEpisodeButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Next Episode"
-            android:visibility="gone"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true" />
+            android:visibility="gone" />
+
     </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/serverRecyclerView"
         android:layout_width="match_parent"

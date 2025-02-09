@@ -1,12 +1,14 @@
 package app.bellonime.jabreak.ui.episode
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +33,10 @@ class EpisodeDetailActivity : AppCompatActivity() {
     private lateinit var prevEpisodeButton: TextView
     private lateinit var nextEpisodeButton: TextView
     private lateinit var serverRecyclerView: RecyclerView
+    private var customView: View? = null
+    private var customViewCallback: WebChromeClient.CustomViewCallback? = null
+    private var originalSystemUiVisibility: Int = 0
+    private var originalOrientation: Int = 0
 
     // URL base (jika diperlukan)
     private val baseUrl = "https://bellonime.vercel.app"
@@ -72,6 +78,82 @@ class EpisodeDetailActivity : AppCompatActivity() {
             return
         }
         fetchEpisodeDetail(episodeId)
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                super.onShowCustomView(view, callback)
+                showCustomView(view, callback)
+            }
+
+            override fun onHideCustomView() {
+                super.onHideCustomView()
+                hideCustomView()
+            }
+        }
+    }
+    private fun showCustomView(view: View?, callback: WebChromeClient.CustomViewCallback?) {
+        if (customView != null) {
+            callback?.onCustomViewHidden()
+            return
+        }
+
+        // Simpan state sebelumnya
+        originalSystemUiVisibility = window.decorView.systemUiVisibility
+        originalOrientation = requestedOrientation
+
+        // Set fullscreen
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
+        // Set landscape orientation
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+
+        // Tambahkan custom view
+        customView = view
+        customViewCallback = callback
+
+        val decor = window.decorView as FrameLayout
+        decor.addView(customView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+
+        // Sembunyikan komponen UI lainnya
+        findViewById<View>(R.id.episodeTitle).visibility = View.GONE
+        findViewById<View>(R.id.prevEpisodeButton).visibility = View.GONE
+        findViewById<View>(R.id.nextEpisodeButton).visibility = View.GONE
+        findViewById<View>(R.id.serverRecyclerView).visibility = View.GONE
+    }
+
+    private fun hideCustomView() {
+        if (customView == null) return
+
+        // Restore system UI visibility
+        window.decorView.systemUiVisibility = originalSystemUiVisibility
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+
+        // Hapus custom view
+        val decor = window.decorView as FrameLayout
+        decor.removeView(customView)
+        customView = null
+        customViewCallback?.onCustomViewHidden()
+        customViewCallback = null
+
+        // Tampilkan kembali komponen UI
+        findViewById<View>(R.id.episodeTitle).visibility = View.VISIBLE
+        findViewById<View>(R.id.prevEpisodeButton).visibility = View.VISIBLE
+        findViewById<View>(R.id.nextEpisodeButton).visibility = View.VISIBLE
+        findViewById<View>(R.id.serverRecyclerView).visibility = View.VISIBLE
+    }
+
+    override fun onBackPressed() {
+        if (customView != null) {
+            hideCustomView()
+        } else if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     // Fungsi untuk mengambil detail episode dari API
@@ -191,11 +273,5 @@ class EpisodeDetailActivity : AppCompatActivity() {
         finish()
     }
 
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
+
 }

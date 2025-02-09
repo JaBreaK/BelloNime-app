@@ -9,19 +9,22 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import app.bellonime.jabreak.R
 import app.bellonime.jabreak.model.AnimeDetail
+import app.bellonime.jabreak.network.AnimeDetailResponse
 import app.bellonime.jabreak.network.RetrofitInstance
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import jp.wasabeef.glide.transformations.BlurTransformation
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import app.bellonime.jabreak.network.AnimeDetailResponse
 
 class AnimeDetailActivity : AppCompatActivity() {
 
+    private lateinit var backgroundImage: ImageView
     private lateinit var poster: ImageView
     private lateinit var title: TextView
     private lateinit var score: TextView
@@ -44,11 +47,13 @@ class AnimeDetailActivity : AppCompatActivity() {
     private lateinit var episodesList: ChipGroup
     private lateinit var connections: TextView
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_anime_detail)
 
-        // Inisialisasi view
+        // Inisialisasi view, termasuk backgroundImage
+        backgroundImage = findViewById(R.id.backgroundImage)
         poster = findViewById(R.id.animePoster)
         title = findViewById(R.id.animeTitle)
         score = findViewById(R.id.animeScore)
@@ -76,8 +81,10 @@ class AnimeDetailActivity : AppCompatActivity() {
             finish()
             return
         }
-        val genres: TextView = findViewById(R.id.animeGenres)
-        genres.text = "Comedy  Romance  Supernatural"
+
+        // Contoh static untuk genre (bisa dihapus atau disesuaikan)
+        genres.text = "ini loding"
+
         // Panggil API untuk detail anime
         fetchAnimeDetail(animeId)
     }
@@ -104,8 +111,18 @@ class AnimeDetailActivity : AppCompatActivity() {
     }
 
     private fun bindAnimeDetail(animeDetail: AnimeDetail) {
+        // Load poster biasa ke ImageView poster
+        Glide.with(this)
+            .load(animeDetail.poster)
+            .into(poster)
+
+        // Load poster yang sama dengan efek blur ke backgroundImage
+        Glide.with(this)
+            .load(animeDetail.poster)
+            .apply(RequestOptions.bitmapTransform(BlurTransformation(25, 3)))
+            .into(backgroundImage)
+
         // Bind data ke view lainnya
-        Glide.with(this).load(animeDetail.poster).into(poster)
         title.text = animeDetail.title ?: "N/A"
         score.text = "${animeDetail.score?.value ?: "N/A"} (${animeDetail.score?.users ?: "N/A"} User)"
         japanese.text = "Japanese: ${animeDetail.japanese ?: "N/A"}"
@@ -128,7 +145,7 @@ class AnimeDetailActivity : AppCompatActivity() {
         // Handle batchList
         batches.text = "Batches: ${animeDetail.batchList?.joinToString(", ") { it.title ?: "" } ?: "No batches available"}"
 
-        // Handle episodeList menggunakan ChipGroup dengan tampilan seperti tombol
+        // Handle episodeList menggunakan ChipGroup
         val episodeList = animeDetail.episodeList
         episodesList.removeAllViews() // Pastikan ChipGroup kosong
 
@@ -139,7 +156,7 @@ class AnimeDetailActivity : AppCompatActivity() {
             chip.isCheckable = false
             chip.layoutParams = ChipGroup.LayoutParams(
                 ChipGroup.LayoutParams.MATCH_PARENT,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50f, resources.displayMetrics).toInt()
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt()
             ).apply {
                 val marginTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics).toInt()
                 val marginBottom = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10f, resources.displayMetrics).toInt()
@@ -163,28 +180,27 @@ class AnimeDetailActivity : AppCompatActivity() {
                 chip.text = "Episode ${episode.title ?: "Unknown Episode"}"
                 chip.layoutParams = ChipGroup.LayoutParams(
                     ChipGroup.LayoutParams.MATCH_PARENT,
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50f, resources.displayMetrics).toInt()
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics).toInt()
                 ).apply {
                     val marginTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
                     val marginBottom = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10f, resources.displayMetrics).toInt()
                     val marginEnd = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
                     setMargins(0, marginTop, marginEnd, marginBottom)
                 }
-                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                 chip.setTextColor(Color.WHITE)
                 chip.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 chip.setBackgroundResource(R.drawable.episode_button_background)
                 chip.setPadding(
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt()
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
                 )
                 chip.isClickable = true
                 chip.isCheckable = false
                 chip.setOnClickListener {
-                    // Tambahkan kode untuk membuka EpisodeDetailActivity
-                    // Jika episode.episodeId tidak null, gunakan nilainya; jika null, gunakan nilai default
+                    // Buka EpisodeDetailActivity dengan mengirim episodeId
                     val episodeId = episode.episodeId ?: "one-piece-gyojin-tou-hen-episode-15"
                     val intent = Intent(this, app.bellonime.jabreak.ui.episode.EpisodeDetailActivity::class.java)
                     intent.putExtra("episodeId", episodeId)
