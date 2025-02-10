@@ -43,6 +43,7 @@
             android:layout_width="match_parent"
             android:gravity="center"
             android:layout_height="wrap_content"
+            android:padding="15dp"
             android:orientation="vertical">
 
             <!-- Tombol Back -->
@@ -57,29 +58,33 @@
             <!-- Poster Anime -->
             <ImageView
                 android:id="@+id/animePoster"
-                android:layout_width="150dp"
-                android:layout_height="225dp"
-                android:layout_margin="16dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="Anime Poster" />
+                android:layout_width="183dp"
+                android:layout_height="273dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="Anime Poster"
+                android:scaleType="centerCrop" />
 
             <!-- Judul Anime -->
+
+            <!-- Detail Anime -->
+
             <TextView
                 android:id="@+id/animeTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:textSize="22sp"
-                android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:layout_marginBottom="8dp"/>
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-            <!-- Detail Anime -->
             <TextView
                 android:id="@+id/animeInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:visibility="gone"
                 android:textSize="16sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginBottom="8dp"/>
@@ -104,17 +109,20 @@
                 android:layout_marginBottom="4dp"
                 android:visibility="gone"
                 />
+
             <TextView
                 android:id="@+id/animeStatus"
                 android:layout_width="match_parent"
-                android:gravity="center"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"/>
+                android:textColor="@color/white"
+                android:layout_marginBottom="4dp"
+                android:gravity="center" />
 
             <TextView
                 android:id="@+id/animeType"
                 android:layout_width="match_parent"
                 android:gravity="center"
+                android:visibility="gone"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"/>
 
@@ -244,8 +252,7 @@
                 android:id="@+id/animeEpisodesList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                app:chipSpacing="8dp"
+                android:padding="20dp"
                 app:singleLine="false" />
 
 

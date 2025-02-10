@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import app.bellonime.jabreak.R
 import app.bellonime.jabreak.adapter.AnimeAdapter
 import app.bellonime.jabreak.network.ApiResponse
@@ -22,7 +23,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AnimeAdapter
-
+    private lateinit var swipeRefresh: SwipeRefreshLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,6 +31,7 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
         recyclerView = view.findViewById(R.id.recyclerView)
+        swipeRefresh = view.findViewById(R.id.swipeRefresh)
 
         val layoutManager = GridLayoutManager(requireContext(), 3)
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -41,30 +43,39 @@ class HomeFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
         fetchAnimeData()
 
+        swipeRefresh.setOnRefreshListener {
+            fetchAnimeData()
+        }
+
         return view
     }
-
-
 
     private fun fetchAnimeData() {
         RetrofitInstance.api.getRecentAnime().enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
                     val animeList = response.body()?.data?.recent?.animeList ?: emptyList()
-                    adapter = AnimeAdapter(animeList) { anime ->
-                        val intent = Intent(requireContext(), AnimeDetailActivity::class.java)
-                        intent.putExtra("animeId", anime.animeId)
-                        startActivity(intent)
+                    if (!::adapter.isInitialized) {
+                        adapter = AnimeAdapter(animeList) { anime ->
+                            val intent = Intent(requireContext(), AnimeDetailActivity::class.java)
+                            intent.putExtra("animeId", anime.animeId)
+                            startActivity(intent)
+                        }
+                        recyclerView.adapter = adapter
+                    } else {
+                        adapter.updateData(animeList)
                     }
-                    recyclerView.adapter = adapter
+                    swipeRefresh.isRefreshing = false
                 } else {
                     Toast.makeText(requireContext(), "Failed to load data", Toast.LENGTH_SHORT)
                         .show()
+                    swipeRefresh.isRefreshing = false
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                swipeRefresh.isRefreshing = false
             }
         })
     }

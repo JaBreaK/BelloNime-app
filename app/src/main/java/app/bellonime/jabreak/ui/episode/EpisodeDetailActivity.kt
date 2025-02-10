@@ -53,7 +53,7 @@ class EpisodeDetailActivity : AppCompatActivity() {
         serverRecyclerView = findViewById(R.id.serverRecyclerView)
 
         // Setup RecyclerView (horizontal)
-        serverRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        serverRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true)
 
         // Konfigurasi WebView
         webView.settings.javaScriptEnabled = true

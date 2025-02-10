@@ -11,7 +11,7 @@ import app.bellonime.jabreak.model.Anime
 import com.bumptech.glide.Glide
 
 class AnimeAdapter(
-    private val animeList: List<Anime>,
+    private var animeList: List<Anime>, // Changed to var
     private val onItemClick: (Anime) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -37,16 +37,21 @@ class AnimeAdapter(
     }
 
     override fun getItemCount(): Int {
-        return animeList.size + 1 // +1 karena ada header
+        return animeList.size + 1 // +1 because of the header
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is HeaderViewHolder) {
             holder.bind()
         } else if (holder is AnimeViewHolder) {
-            val anime = animeList[position - 1] // Kurangi 1 karena posisi 0 adalah header
+            val anime = animeList[position - 1] // Subtract 1 because position 0 is the header
             holder.bind(anime, onItemClick)
         }
+    }
+
+    fun updateData(newAnimeList: List<Anime>) {
+        animeList = newAnimeList
+        notifyDataSetChanged()
     }
 
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {

@@ -8,4 +8,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="chip_background">#40FFFFFF</color>
+    <color name="primary">#6200EE</color> <!-- Ungu (Ganti sesuai warna tema) -->
+    <color name="gray">#9E9E9E</color>  <!-- Abu-abu -->
+    <color name="bottom_nav_color">#000000</color>
+    <color name="active_color">#FF6200EE</color>
+    <color name="inactive_color">#808080</color><!-- Abu-abu -->
+
+
+
 </resources>

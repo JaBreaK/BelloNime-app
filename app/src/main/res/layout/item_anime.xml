@@ -20,10 +20,7 @@
             android:scaleType="centerCrop" />
 
         <!-- Overlay Gelap untuk Meningkatkan Keterbacaan Teks -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#66000000" />
+
 
         <!-- Judul Anime -->
         <TextView
@@ -33,7 +30,7 @@
             android:layout_gravity="bottom"
             android:background="@drawable/bg_status"
             android:ellipsize="end"
-            android:maxLines="1"
+            android:maxLines="2"
             android:padding="8dp"
             android:textColor="@android:color/white"
             android:textSize="12sp"
@@ -59,7 +56,8 @@
             android:padding="4dp"
             android:text="Ep 7"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="14sp"
+            android:textStyle="bold"/>
 
     </FrameLayout>
 
