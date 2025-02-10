@@ -15,6 +15,7 @@ import app.bellonime.jabreak.network.AnimeDetailResponse
 import app.bellonime.jabreak.network.RetrofitInstance
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -44,8 +45,10 @@ class AnimeDetailActivity : AppCompatActivity() {
     private lateinit var genres: TextView
     private lateinit var batches: TextView
     // Ubah tipe dari TextView ke ChipGroup
-    private lateinit var episodesList: ChipGroup
     private lateinit var connections: TextView
+    // Perbaiki tipe dari ChipGroup ke FlexboxLayout
+    private lateinit var episodesList: FlexboxLayout
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,7 +159,7 @@ class AnimeDetailActivity : AppCompatActivity() {
             chip.isCheckable = false
             chip.layoutParams = ChipGroup.LayoutParams(
                 ChipGroup.LayoutParams.MATCH_PARENT,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt()
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics).toInt()
             ).apply {
                 val marginTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics).toInt()
                 val marginBottom = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10f, resources.displayMetrics).toInt()
@@ -168,46 +171,55 @@ class AnimeDetailActivity : AppCompatActivity() {
             chip.textAlignment = View.TEXT_ALIGNMENT_CENTER
             chip.setBackgroundResource(R.drawable.episode_button_background)
             chip.setPadding(
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt(),
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics).toInt()
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt(),
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt(),
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt(),
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt()
             )
             episodesList.addView(chip)
         } else {
-            for (episode in episodeList) {
+            for ((index, episode) in episodeList.withIndex()) {
                 val chip = Chip(this)
-                chip.text = "Episode ${episode.title ?: "Unknown Episode"}"
-                chip.layoutParams = ChipGroup.LayoutParams(
-                    ChipGroup.LayoutParams.MATCH_PARENT,
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics).toInt()
+                chip.text = "Ep ${episode.title ?: index + 1}"
+
+                // Atur bentuk Chip (sudut melengkung)
+                chip.shapeAppearanceModel = chip.shapeAppearanceModel
+                    .toBuilder()
+                    .setAllCornerSizes(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics))
+                    .build()
+
+                // Atur ukuran dan margin agar jadi grid 3xN
+                val layoutParams = FlexboxLayout.LayoutParams(
+                    FlexboxLayout.LayoutParams.WRAP_CONTENT,
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
                 ).apply {
-                    val marginTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
-                    val marginBottom = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10f, resources.displayMetrics).toInt()
-                    val marginEnd = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
-                    setMargins(0, marginTop, marginEnd, marginBottom)
+                    flexGrow = 1f  // Semua item mendapatkan ukuran yang sama
+                    flexBasisPercent = 1f / 4f  // Setiap Chip mengisi 1/3 lebar layar
+                    val margin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6f, resources.displayMetrics).toInt()
+                    setMargins(margin, margin, margin, margin)
                 }
-                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                chip.layoutParams = layoutParams
+
+                // Warna latar belakang Chip
+                chip.setChipBackgroundColorResource(R.color.eps)
                 chip.setTextColor(Color.WHITE)
-                chip.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                chip.setBackgroundResource(R.drawable.episode_button_background)
-                chip.setPadding(
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt(),
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt()
-                )
-                chip.isClickable = true
+
                 chip.isCheckable = false
+                chip.isClickable = true
+
+                // Event klik Chip
                 chip.setOnClickListener {
-                    // Buka EpisodeDetailActivity dengan mengirim episodeId
-                    val episodeId = episode.episodeId ?: "one-piece-gyojin-tou-hen-episode-15"
+                    val episodeId = episode.episodeId ?: "default_episode"
                     val intent = Intent(this, app.bellonime.jabreak.ui.episode.EpisodeDetailActivity::class.java)
                     intent.putExtra("episodeId", episodeId)
                     startActivity(intent)
                 }
+
+                // Tambahkan Chip ke FlexboxLayout
                 episodesList.addView(chip)
             }
+
+
         }
 
         // Handle connections

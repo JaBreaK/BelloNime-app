@@ -15,6 +15,7 @@
         android:theme="@style/Theme.BelloNime"
         tools:targetApi="31"
         android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
         >
 
         <activity

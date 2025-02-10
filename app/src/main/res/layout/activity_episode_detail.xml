@@ -1,50 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    >
+>
 
-
+    <!-- WebView untuk memutar video -->
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="5dp" />
+        android:layout_marginBottom="8dp" />
 
+    <!-- Judul Episode -->
     <TextView
         android:id="@+id/episodeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
         android:text="Episode Title"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:padding="8dp" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/serverChipGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
-
+    <!-- Kontainer tombol navigasi episode -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:padding="8dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/prevEpisodeButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Previous Episode"
             android:layout_marginEnd="8dp"
+            android:text="Previous Episode"
             android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
@@ -54,13 +50,38 @@
             android:layout_height="wrap_content"
             android:text="Next Episode"
             android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Kontainer untuk dropdown pilihan kualitas dan daftar server -->
+    <LinearLayout
+        android:id="@+id/serverSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Dropdown untuk pilih kualitas (misalnya 360p, 480p, 720p, 1080p, 4K) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/qualityDropdownLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:hint="Pilih Kualitas">
+
+            <AutoCompleteTextView
+                android:id="@+id/qualityDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ChipGroup untuk menampilkan daftar server sesuai kualitas yang dipilih -->
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/serverRecyclerView"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/serverChipGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/dark_background" />
+        android:layout_marginTop="8dp" />
 </LinearLayout>
