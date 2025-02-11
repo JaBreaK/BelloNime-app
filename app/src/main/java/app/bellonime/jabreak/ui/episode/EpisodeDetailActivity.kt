@@ -10,7 +10,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -107,10 +107,10 @@ class EpisodeDetailActivity : AppCompatActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         customView = view
         customViewCallback = callback
-        val decor = window.decorView as LinearLayout
-        decor.addView(customView, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
+        val decor = window.decorView as FrameLayout
+        decor.addView(customView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
         ))
         // Sembunyikan UI utama
         titleText.visibility = View.GONE
@@ -124,7 +124,7 @@ class EpisodeDetailActivity : AppCompatActivity() {
         if (customView == null) return
         window.decorView.systemUiVisibility = originalSystemUiVisibility
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        val decor = window.decorView as LinearLayout
+        val decor = window.decorView as FrameLayout
         decor.removeView(customView)
         customView = null
         customViewCallback?.onCustomViewHidden()
