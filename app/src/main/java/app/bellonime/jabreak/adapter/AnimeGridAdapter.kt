@@ -40,7 +40,7 @@ class AnimeGridAdapter(
 
         fun bind(anime: Anime, onItemClick: (Anime) -> Unit) {
             title.text = anime.title
-            episodes.text = "Episode: ${anime.episodes}"
+            episodes.text = "Ep ${anime.episodes}"
             Glide.with(poster.context)
                 .load(anime.poster)
                 .into(poster)

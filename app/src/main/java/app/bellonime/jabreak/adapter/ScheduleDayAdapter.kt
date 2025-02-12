@@ -48,6 +48,8 @@ class ScheduleDayAdapter(
             )
             val animeAdapter = ScheduleAnimeAdapter(scheduleDay.animeList, onAnimeClick)
             recyclerViewAnimeList.adapter = animeAdapter
+            recyclerViewAnimeList.isNestedScrollingEnabled = false
+
         }
     }
 }

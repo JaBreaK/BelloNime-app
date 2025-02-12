@@ -36,7 +36,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:padding="8dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#E91E63" />
 
             <!-- Grid RecyclerView untuk daftar anime -->
             <androidx.recyclerview.widget.RecyclerView

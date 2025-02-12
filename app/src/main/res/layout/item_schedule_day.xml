@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@color/black"
     android:paddingBottom="16dp">
@@ -17,10 +17,20 @@
         android:textColor="#FFFFFF"
         android:padding="8dp" />
 
+    <!-- Garis penanda di bawah TextView -->
+    <View
+        android:layout_width="100dp"
+        android:layout_height="5dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="#E91E63"
+        app:cardCornerRadius="12dp" />
+
     <!-- Nested RecyclerView untuk daftar anime pada hari tersebut (dengan orientasi horizontal) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAnimeList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp" />
+
 </LinearLayout>
